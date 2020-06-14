@@ -17,6 +17,8 @@
                     <div class="card-body">
                         <h5 class="card-title"><%= campground.name %></h5>
                     </div>
+                    <!-- Creates a random hex id for mongodb -->
+                    <p><a href="/campgrounds/<%- campground._id %>" class="btn btn-primary">More Info</a></p>
                 </div>
             </div>
         <%}) %>
