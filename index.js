@@ -2,6 +2,8 @@ const
     mongoose = require("mongoose"),
     express = require("express"),
     bodyParser = require("body-parser"),
+    campground = require("./models/campground"),
+    seed_db = require("./models/seed"),
     app = express();
 
 // Connect to yelpCamp database
@@ -15,30 +17,8 @@ app.get("/", (req, res)=>{
         res.render("landing");
 })
 
-// Monog schema init
-let 
-    campgroundSchema = new mongoose.Schema({
-        name: String,
-        image: String,
-        description: String
-    }), 
-    Campground = mongoose.model("Campground", campgroundSchema);
-
-// Campground.create({
-    // name: "Reddington", 
-    // image: "https://cdn.pixabay.com/photo/2017/07/17/16/16/nature-2512932_960_720.jpg"}, (err, campground)=>{
-    // (err) ? 
-    // console.log(err) :
-    // console.log("New campground: " + campground.name);
-// });
-// Array from v1
-// let campgrounds = [
-    // {name: "Sabino Canyon", image: "https://cdn.pixabay.com/photo/2016/01/26/23/32/camp-1163419_960_720.jpg"},
-    // {name: "Reddington", image: "https://cdn.pixabay.com/photo/2017/07/17/16/16/nature-2512932_960_720.jpg"},
-    // {name: "Loch Raven", image: "https://cdn.pixabay.com/photo/2020/02/09/08/08/tent-4832253_960_720.jpg"},
-    // {name: "Sandy Creek", image: "https://cdn.pixabay.com/photo/2015/08/04/11/02/caravans-874549_960_720.jpg"},
-    // {name: "White Marsh", image: "https://cdn.pixabay.com/photo/2015/05/23/00/25/utah-780108_960_720.jpg"}
-// ];
+// Seed the database with fixed content
+seed_db();
 
 /** RESTful convention: A pattern of routes that other people can follow **/ 
 /* name     url                     verb    description 
@@ -58,7 +38,7 @@ app.get("/campgrounds", (req, res)=>{
     // res.render("campgrounds", {campgrounds:campgrounds});
 
     // Get campgrounds from database
-    Campground.find({}, (err, campgrounds_from_db)=>{
+    campground.find({}, (err, campgrounds_from_db)=>{
         (err) ?
         console.log(err) :
         res.render("index", {campgrounds:campgrounds_from_db});
@@ -78,16 +58,16 @@ app.post("/campgrounds", (req, res)=>{
         name = req.body.name,
         image = req.body.image,
         description = req.body.description,
-        newCampground = {
+        newcampground = {
             name: name,
             image: image,
             description: description
         };
     
     // Push the new campground from user input into the campgrounds array
-    // campgrounds.push(newCampground);
+    // campgrounds.push(newcampground);
     // Create a new campground and save to database
-    Campground.create(newCampground, (err, newCampgrounds_to_db) =>{
+    campground.create(newcampground, (err, newcampgrounds_to_db) =>{
         (err) ?
         console.log(err) : 
         res.redirect("/campgrounds");
@@ -106,14 +86,14 @@ app.get("/campgrounds/:id", (req, res)=>{
     // Find the campground with provided ID
     // Render show template with that specific campground
     // res.send("This will be the show page")
-    Campground.findById(req.params.id, (err, foundCampground)=>{
+    campground.findById(req.params.id).populate("comments").exec(function(err, foundcampground) {
         (err) ?
         console.log(err) :
         // Pass campground to the "show" route
-        res.render("show", {campground: foundCampground});
+        res.render("show", {campground: foundcampground});
     });
 })
 
-app.listen(3000, ()=>{
+app.listen(9090, ()=>{
     console.log("YelpCamp server started");
 })
