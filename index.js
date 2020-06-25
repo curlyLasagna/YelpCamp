@@ -1,14 +1,14 @@
 const 
-    mongoose = require("mongoose"),
-    express = require("express"),
-    bodyParser = require("body-parser"),
     campground = require("./models/campground"),
-    seed_db = require("./models/seed"),
-    app = express();
+    comment    = require("./models/comment");
+    seed_db    = require("./models/seed"),
+    bodyParser = require("body-parser"),
+    mongoose   = require("mongoose"),
+    express    = require("express"),
+    app        = express();
 
 // Connect to yelpCamp database
-mongoose.connect("mongodb://localhost/yelpCamp", {useNewUrlParser: true});
-mongoose.set('useUnifiedTopology', true);
+mongoose.connect("mongodb://localhost/yelpCamp", {useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("/public"));
 app.set("view engine", "ejs");
@@ -41,19 +41,19 @@ app.get("/campgrounds", (req, res)=>{
     campground.find({}, (err, campgrounds_from_db)=>{
         (err) ?
         console.log(err) :
-        res.render("index", {campgrounds:campgrounds_from_db});
+        res.render("campgrounds/index", {campgrounds:campgrounds_from_db});
     })
 });
 
 // Create route - adds a new campground
 app.get("/new", (req, res) =>{
-    res.render("new");
+    res.render("campgrounds/new");
 })
 
 // New route - shows the form to create a new campground
 app.post("/campgrounds", (req, res)=>{
     // Get data from form and add to campgrounds array
-    // Also redirects to the campgrounds page
+    // Also redirects to the campgrounds page after the campground is created
     let 
         name = req.body.name,
         image = req.body.image,
@@ -78,8 +78,9 @@ app.post("/campgrounds", (req, res)=>{
 // If campgrounds/:id is declared first, then 
 // campgrounds/new will never be reached
 app.get("/campgrounds/new", (req, res)=>{
-    res.render("new");
+    res.render("campgrounds/new");
 });
+
 
 // Show - Shows more info about the campground
 app.get("/campgrounds/:id", (req, res)=>{
@@ -90,8 +91,41 @@ app.get("/campgrounds/:id", (req, res)=>{
         (err) ?
         console.log(err) :
         // Pass campground to the "show" route
-        res.render("show", {campground: foundcampground});
+        res.render("campgrounds/show", {campground: foundcampground});
     });
+})
+
+// Comment routes
+app.get("/campgrounds/:id/comments/new", (req, res)=> {
+    campground.findById(req.params.id, function (err, campground){
+        (err) ?
+        console.log(err) :
+        res.render("comments/new", {campground: campground});
+    })
+})
+
+app.post("/campgrounds/:id/comments", (req, res)=>{
+    campground.findById(req.params.id, (err, campground)=>{
+        if (err) {
+            console.log(err); 
+            res.redirect("/campgrounds");
+        }
+        else {
+            comment.create(req.body.comment, (err, comment)=>{
+                if (err)
+                    console.log(err) 
+                else {
+                    campground.comments.push(comment);
+                    campground.save();
+                    res.redirect(`/campgrounds/${campground._id}`)
+                }
+            })
+        }
+    })
+})
+
+app.get("*", (req, res)=>{
+    res.send("This part of the website is non existent");
 })
 
 app.listen(9090, ()=>{
