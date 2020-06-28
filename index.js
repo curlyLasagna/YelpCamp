@@ -10,7 +10,8 @@ const
 // Connect to yelpCamp database
 mongoose.connect("mongodb://localhost/yelpCamp", {useNewUrlParser: true, useUnifiedTopology: true});
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("/public"));
+// __dirname is the directory that this script is currently running
+app.use(express.static(`${__dirname}/public`));
 app.set("view engine", "ejs");
 
 app.get("/", (req, res)=>{

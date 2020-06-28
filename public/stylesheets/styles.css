@@ -1,0 +1,25 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+.card-img-top {
+	padding: 5px;
+}
+
+.img-fluid {
+    width: 100%;
+}
+
+.img-thumbnail {
+    padding: 0;
+}
+
+.caption {
+    padding: 10px;
+}
+
+.card#commentSection {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
