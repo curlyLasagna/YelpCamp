@@ -1,21 +1,50 @@
 const 
-    campground = require("./models/campground"),
-    comment    = require("./models/comment");
-    seed_db    = require("./models/seed"),
-    bodyParser = require("body-parser"),
-    mongoose   = require("mongoose"),
-    express    = require("express"),
-    app        = express();
+    // Dependencies
+    localStrategy       = require("passport-local"),
+    bodyParser          = require("body-parser"),
+    passport            = require("passport"),
+    mongoose            = require("mongoose"),
+    express             = require("express"),
+    // Models
+    campground          = require("./models/campground"),
+    comment             = require("./models/comment"),
+    seed_db             = require("./models/seed"),
+    user                = require("./models/user"),
+    // Routes
+    campgroundRoutes    = require("./routes/campgrounds"),
+    commentRoutes       = require("./routes/comments"),
+    indexRoutes         = require("./routes/index"),
+    app                 = express();
 
 // Connect to yelpCamp database
 mongoose.connect("mongodb://localhost/yelpCamp", {useNewUrlParser: true, useUnifiedTopology: true});
+
 app.use(bodyParser.urlencoded({extended: true}));
 // __dirname is the directory that this script is currently running
 app.use(express.static(`${__dirname}/public`));
+
+// Allows you to omit the .ejs extension 
 app.set("view engine", "ejs");
 
-app.get("/", (req, res)=>{
-        res.render("landing");
+// Passport configuration
+app.use(require("express-session")({
+    secret: "YelpCamp admin page",
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new localStrategy(user.authenticate()));
+passport.serializeUser(user.serializeUser());
+passport.deserializeUser(user.deserializeUser());
+
+app.use((req, res, next)=>{
+    // Adds the scope of currentUser to all templates
+    res.locals.currentUser = req.user;
+    next();
 })
 
 // Seed the database with fixed content
@@ -32,102 +61,16 @@ seed_db();
  * -Update  /campgrounds/:id        PUT     Update a campground then redirect
  * -Destroy /campgrounds/:id        DELETE  Delete a campground, then redirect
 */
-// Index route - show all campgrounds
-app.get("/campgrounds", (req, res)=>{
-    // Instead of rendering the campgrounds array,
-    // render the campgrounds from the database
-    // res.render("campgrounds", {campgrounds:campgrounds});
 
-    // Get campgrounds from database
-    campground.find({}, (err, campgrounds_from_db)=>{
-        (err) ?
-        console.log(err) :
-        res.render("campgrounds/index", {campgrounds:campgrounds_from_db});
-    })
-});
-
-// Create route - adds a new campground
-app.get("/new", (req, res) =>{
-    res.render("campgrounds/new");
-})
-
-// New route - shows the form to create a new campground
-app.post("/campgrounds", (req, res)=>{
-    // Get data from form and add to campgrounds array
-    // Also redirects to the campgrounds page after the campground is created
-    let 
-        name = req.body.name,
-        image = req.body.image,
-        description = req.body.description,
-        newcampground = {
-            name: name,
-            image: image,
-            description: description
-        };
-    
-    // Push the new campground from user input into the campgrounds array
-    // campgrounds.push(newcampground);
-    // Create a new campground and save to database
-    campground.create(newcampground, (err, newcampgrounds_to_db) =>{
-        (err) ?
-        console.log(err) : 
-        res.redirect("/campgrounds");
-    })
-});
-
-// The order of the routes matter 
-// If campgrounds/:id is declared first, then 
-// campgrounds/new will never be reached
-app.get("/campgrounds/new", (req, res)=>{
-    res.render("campgrounds/new");
-});
-
-
-// Show - Shows more info about the campground
-app.get("/campgrounds/:id", (req, res)=>{
-    // Find the campground with provided ID
-    // Render show template with that specific campground
-    // res.send("This will be the show page")
-    campground.findById(req.params.id).populate("comments").exec(function(err, foundcampground) {
-        (err) ?
-        console.log(err) :
-        // Pass campground to the "show" route
-        res.render("campgrounds/show", {campground: foundcampground});
-    });
-})
-
-// Comment routes
-app.get("/campgrounds/:id/comments/new", (req, res)=> {
-    campground.findById(req.params.id, function (err, campground){
-        (err) ?
-        console.log(err) :
-        res.render("comments/new", {campground: campground});
-    })
-})
-
-app.post("/campgrounds/:id/comments", (req, res)=>{
-    campground.findById(req.params.id, (err, campground)=>{
-        if (err) {
-            console.log(err); 
-            res.redirect("/campgrounds");
-        }
-        else {
-            comment.create(req.body.comment, (err, comment)=>{
-                if (err)
-                    console.log(err) 
-                else {
-                    campground.comments.push(comment);
-                    campground.save();
-                    res.redirect(`/campgrounds/${campground._id}`)
-                }
-            })
-        }
-    })
-})
-
-app.get("*", (req, res)=>{
-    res.send("This part of the website is non existent");
-})
+// Add routes
+/* Basically include the routes since they're in a different file 
+ * The first string argument allows the route in their respective file 
+ * to be shorten, so instead of router.get(/campgrounds/new) it can be
+ * shorten to router.get(/new)
+ */
+app.use(indexRoutes);
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/comments", commentRoutes);
 
 app.listen(9090, ()=>{
     console.log("YelpCamp server started");
