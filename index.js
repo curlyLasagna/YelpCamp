@@ -48,7 +48,7 @@ app.use((req, res, next)=>{
 })
 
 // Seed the database with fixed content
-seed_db();
+// seed_db();
 
 /** RESTful convention: A pattern of routes that other people can follow **/ 
 /* name     url                     verb    description 
@@ -68,9 +68,9 @@ seed_db();
  * to be shorten, so instead of router.get(/campgrounds/new) it can be
  * shorten to router.get(/new)
  */
-app.use(indexRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
+app.use(indexRoutes);
 
 app.listen(9090, ()=>{
     console.log("YelpCamp server started");

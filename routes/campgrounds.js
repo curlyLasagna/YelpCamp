@@ -24,7 +24,7 @@ router.get("/", (req, res)=>{
 });
 
 // Create route - adds a new campground
-router.get("/new", (req, res) =>{
+router.get("/new", isLoggedIn, (req, res) =>{
     res.render("campgrounds/new");
 })
 
@@ -32,23 +32,29 @@ router.get("/new", (req, res) =>{
 router.post("/", (req, res)=>{
     // Get data from form and add to campgrounds array
     // Also redirects to the campgrounds page after the campground is created
+    console.log(req.user.username);
     let 
         name = req.body.name,
         image = req.body.image,
         description = req.body.description,
+        author = {
+            id: req.user._id,
+            username: req.user.username
+        },
+        // What to pass to the create function
         newcampground = {
             name: name,
             image: image,
+            author: author,
             description: description
         };
-    
     // Push the new campground from user input into the campgrounds array
     // campgrounds.push(newcampground);
     // Create a new campground and save to database
     campground.create(newcampground, (err, newcampgrounds_to_db) =>{
         (err) ?
         console.log(err) : 
-        res.redirect("/campgrounds");
+        console.log(newcampgrounds_to_db); res.redirect("/campgrounds");
     })
 });
 
