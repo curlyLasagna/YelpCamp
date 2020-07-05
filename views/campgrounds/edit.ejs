@@ -1,15 +1,15 @@
 <%- include('../partials/header')%>
 <div class="row justify-content-center">
   <div class="col-md-12 text-center">
-    <h1>Create a New Campground</h1>
+    <h1>Edit <%= campground.name %></h1>
   </div>
   <div class="col-xs-12 col-md-6 col-lg-4">
-    <form action="/campgrounds" method="post">
+    <form action="/campgrounds/<%= campground._id %>?_method=PUT" method="post">
       <div class="form-group">
         <input
           type="text"
-          placeholder="Campground"
-          name="name"
+          value="<%= campground.name %>"
+          name="campground[name]"
           id=""
           class="form-control"
         />
@@ -17,8 +17,8 @@
       <div class="form-group">
         <input
           type="text"
-          placeholder="Image url"
-          name="image"
+          value="<%= campground.image %>"
+          name="campground[image]"
           id=""
           class="form-control"
         />
@@ -26,8 +26,8 @@
       <div class="form-group">
         <input
           type="text"
-          placeholder="Description"
-          name="description"
+          value="<%= campground.description %>"
+          name="campground[description]"
           id=""
           class="form-control"
         />
@@ -36,7 +36,7 @@
         <button class="btn btn-lg btn-primary">Submit!</button>
       </div>
     </form>
-    <a href="/campgrounds">Go back</a>
+    <a href="/campgrounds/<%= campground._id %>">Go back</a>
   </div>
 </div>
 <%- include('../partials/footer')%>

@@ -1,37 +1,46 @@
-const 
-    // Dependencies
-    localStrategy       = require("passport-local"),
-    bodyParser          = require("body-parser"),
-    passport            = require("passport"),
-    mongoose            = require("mongoose"),
-    express             = require("express"),
-    // Models
-    campground          = require("./models/campground"),
-    comment             = require("./models/comment"),
-    seed_db             = require("./models/seed"),
-    user                = require("./models/user"),
-    // Routes
-    campgroundRoutes    = require("./routes/campgrounds"),
-    commentRoutes       = require("./routes/comments"),
-    indexRoutes         = require("./routes/index"),
-    app                 = express();
+const // Dependencies
+  methodOverride = require("method-override"),
+  localStrategy = require("passport-local"),
+  bodyParser = require("body-parser"),
+  passport = require("passport"),
+  mongoose = require("mongoose"),
+  express = require("express"),
+  // Models
+  campground = require("./models/campground"),
+  comment = require("./models/comment"),
+  seed_db = require("./models/seed"),
+  user = require("./models/user"),
+  // Routes
+  campgroundRoutes = require("./routes/campgrounds"),
+  commentRoutes = require("./routes/comments"),
+  indexRoutes = require("./routes/index"),
+  app = express();
 
 // Connect to yelpCamp database
-mongoose.connect("mongodb://localhost/yelpCamp", {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect("mongodb://localhost/yelpCamp", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false
+});
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 // __dirname is the directory that this script is currently running
 app.use(express.static(`${__dirname}/public`));
 
-// Allows you to omit the .ejs extension 
+// override with POST  
+app.use(methodOverride("_method"));
+
+// Allows you to omit the .ejs extension
 app.set("view engine", "ejs");
 
 // Passport configuration
-app.use(require("express-session")({
+app.use(
+  require("express-session")({
     secret: "YelpCamp admin page",
     resave: false,
-    saveUninitialized: false
-}));
+    saveUninitialized: false,
+  })
+);
 
 // Initialize passport
 app.use(passport.initialize());
@@ -41,16 +50,17 @@ passport.use(new localStrategy(user.authenticate()));
 passport.serializeUser(user.serializeUser());
 passport.deserializeUser(user.deserializeUser());
 
-app.use((req, res, next)=>{
-    // Adds the scope of currentUser to all templates
-    res.locals.currentUser = req.user;
-    next();
-})
+app.use((req, res, next) => {
+  // Adds the scope of currentUser to all templates
+  res.locals.currentUser = req.user;
+  next();
+});
 
 // Seed the database with fixed content
 // seed_db();
 
-/** RESTful convention: A pattern of routes that other people can follow **/ 
+/** RESTful convention: A pattern of routes that other people can follow **/
+
 /* name     url                     verb    description 
 =====================================================================================
  * -Index   /campgrounds            GET     Displays all the campgrounds
@@ -63,8 +73,8 @@ app.use((req, res, next)=>{
 */
 
 // Add routes
-/* Basically include the routes since they're in a different file 
- * The first string argument allows the route in their respective file 
+/* Basically include the routes since they're in a different file
+ * The first string argument allows the route in their respective file
  * to be shorten, so instead of router.get(/campgrounds/new) it can be
  * shorten to router.get(/new)
  */
@@ -72,6 +82,6 @@ app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
 app.use(indexRoutes);
 
-app.listen(9090, ()=>{
-    console.log("YelpCamp server started");
-})
+app.listen(9000, () => {
+  console.log("YelpCamp server started");
+});
