@@ -1,4 +1,7 @@
 const campground = require("../models/campground"),
+  // Read https://nodejs.org/api/modules.html#modules_folders_as_modules 
+  // to understand why we named our middleware index.js
+  middleware = require("../middleware"),
   express = require("express"),
   router = express.Router();
 
@@ -23,7 +26,7 @@ router.get("/", (req, res) => {
 });
 
 // Create route - adds a new campground
-router.get("/new", isLoggedIn, (req, res) => {
+router.get("/new", middleware.isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 
@@ -57,7 +60,7 @@ router.post("/", (req, res) => {
 // The order of the routes matter
 // If campgrounds/:id is declared first, then
 // campgrounds /new will never be reached
-router.get("/new", isLoggedIn, (req, res) => {
+router.get("/new", middleware.isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 
@@ -78,7 +81,7 @@ router.get("/:id", (req, res) => {
 });
 
 /** Editing campground routes */
-router.get("/:id/edit", campgroundOwnership, (req, res) => {
+router.get("/:id/edit", middleware.campgroundOwnership, (req, res) => {
   campground.findById(req.params.id, (err, returnedCampground) => {
     console.log(returnedCampground);
     res.render("campgrounds/edit", { campground: returnedCampground });
@@ -99,40 +102,10 @@ router.put("/:id", (req, res) => {
 });
 
 /** Destroy campground routes */
-router.delete("/:id", campgroundOwnership, (req, res) => {
+router.delete("/:id", middleware.campgroundOwnership, (req, res) => {
   campground.findByIdAndDelete(req.params.id, (err) => {
     err ? res.redirect("/campgrounds") : res.redirect("/campgrounds");
   });
 });
-
-/* We can use this function to whatever functionality that requires a log in */
-
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) return next();
-
-  res.redirect("/login");
-}
-
-function campgroundOwnership(req, res, next) {
-  if (req.isAuthenticated()) {
-    // Find the campground and if the user has the right permission,
-    // proceed with the request, such as editing and deleting
-    campground.findById(req.params.id, (err, foundCampground) => {
-      if (err) {
-        res.redirect("back");
-      } else {
-        if (foundCampground.author.id.equals(req.user._id)) {
-          next();
-        } else {
-        // author.id returns a mongoose object so we have to use the
-        // built in method of .equals to compare the request
-          res.redirect("back");
-        }
-      }
-    });
-  }
-  // Returns the user back to the previous page
-  else res.redirect("back");
-}
 
 module.exports = router;

@@ -19,7 +19,8 @@
           <p>
             <em>Submitted by: <%= campground.author.username%></em>
           </p>
-          <% if(currentUser && campground.author.id.equals(currentUser._id)) { %>
+          <% if(currentUser && campground.author.id.equals(currentUser._id)) {
+          %>
           <a
             class="btn btn-warning"
             href="/campgrounds/<%= campground._id %>/edit"
@@ -28,11 +29,11 @@
           <form
             action="/campgrounds/<%= campground._id %>?_method=DELETE"
             method="POST"
-            id="delete-form"
+            class="delete-form"
           >
             <button class="btn btn-danger">Delete</button>
           </form>
-        <%} %>
+          <%} %>
         </div>
       </div>
       <div class="card" id="commentSection">
@@ -51,6 +52,24 @@
               <span class="float-right">10 days ago</span>
               <strong><%=comment.author.username%> </strong>
               <p><%=comment.text%></p>
+              <% if(currentUser && campground.author.id.equals(currentUser._id)) { %>
+              <a
+                class="btn btn-xs btn-warning"
+                href="/campgrounds/<%=campground._id%>/comments/<%=comment._id%>/edit"
+                >Edit</a
+              >
+              <form
+                action="/campgrounds/<%=campground._id%>/comments/<%=comment._id%>?_method=DELETE"
+                method="POST"
+                class="delete-form"
+              >
+                <input
+                  class="btn btn-xs btn-danger"
+                  type="submit"
+                  value="Delete"
+                />
+              </form>
+              <% } %>
             </div>
           </div>
           <%})%>
