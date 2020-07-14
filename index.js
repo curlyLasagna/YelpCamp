@@ -2,6 +2,7 @@ const // Dependencies
   methodOverride = require("method-override"),
   localStrategy = require("passport-local"),
   bodyParser = require("body-parser"),
+  flash = require("connect-flash"),
   passport = require("passport"),
   mongoose = require("mongoose"),
   express = require("express"),
@@ -27,6 +28,7 @@ mongoose.connect("mongodb://localhost/yelpCamp", {
 app.use(bodyParser.urlencoded({ extended: true }));
 // __dirname is the directory that this script is currently running
 app.use(express.static(`${__dirname}/public`));
+app.use(flash());
 
 // override with POST  
 app.use(methodOverride("_method"));
@@ -52,8 +54,10 @@ passport.serializeUser(user.serializeUser());
 passport.deserializeUser(user.deserializeUser());
 
 app.use((req, res, next) => {
-  // Adds the scope of currentUser to all templates
-  res.locals.currentUser = req.user;
+  // Adds the scope of currentUser and message to all templates
+  res.locals.currentUser = req.user,
+  res.locals.flash_success = req.flash("success");
+  res.locals.flash_error = req.flash("error");
   next();
 });
 

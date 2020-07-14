@@ -30,8 +30,10 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
       res.redirect("/campgrounds");
     } else {
       comment.create(req.body.comment, (err, comment) => {
-        if (err) console.log(err);
-        else {
+        if (err) {
+          req.flash("error", "Something went wrong");
+          console.log(err);
+        } else {
           // Sets the variables to pass to database
           comment.author.id = req.user._id;
           comment.author.username = req.user.username;
@@ -39,6 +41,7 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
           campground.comments.push(comment);
           // saves the comment
           campground.save();
+          req.flash("success", "Thanks for the comment");
           res.redirect(`/campgrounds/${campground._id}`);
         }
       });
@@ -74,7 +77,11 @@ router.put("/:comment_id", middleware.commentOwnership, (req, res) => {
 // Comment destroy route
 router.delete("/:comment_id", middleware.commentOwnership, (req, res) => {
   comment.findByIdAndRemove(req.params.comment_id, (err) => {
-    err ? res.redirect("back") : res.redirect(`/campgrounds/${req.params.id}`);
+    if (err) res.redirect("back");
+    else {
+      req.flash("success", "Comment deleted");
+      res.redirect(`/campgrounds/${req.params.id}`);
+    }
   });
 });
 

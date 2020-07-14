@@ -44,7 +44,7 @@
           <li class="nav-item">
             <a
               class="nav-link"
-              href="/logout"
+              href="/"
               tabindex="-1"
               aria-disabled="true"
               >Signed in as <%= currentUser.username %></a
@@ -63,5 +63,18 @@
         </ul>
       </div>
     </nav>
+    <div class="container">
+      <!-- flash_error is an empty string, so error.length is required for this purpose -->
+      <% if(flash_error && flash_error.length > 0) { %>
+      <div class="alert alert-danger" role="alert">
+        <%= flash_error %>
+      </div>
+      <% } %>
+      <% if(flash_success && flash_success.length > 0) { %>
+      <div class="alert alert-success" role="alert">
+        <%= flash_success %>
+      </div>
+      <% } %>
+    </div>
   </body>
 </html>
