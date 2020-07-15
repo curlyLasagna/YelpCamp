@@ -34,7 +34,6 @@ router.get("/new", middleware.isLoggedIn, (req, res) => {
 router.post("/", (req, res) => {
   // Get data from form and add to campgrounds array
   // Also redirects to the campgrounds page after the campground is created
-  console.log(req.user.username);
   let name = req.body.name,
     image = req.body.image,
     description = req.body.description,

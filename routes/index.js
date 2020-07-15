@@ -22,7 +22,7 @@ router.post("/register", (req, res) => {
   user.register(newUser, req.body.password, (err, user) => {
     if (err) {
       req.flash("error", err.message);
-      return res.render("register");
+      return res.redirect("/register");
     }
     // After the user signs up successfully, they will be redirected
     // to the campgrounds page
