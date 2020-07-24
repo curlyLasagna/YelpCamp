@@ -35,6 +35,7 @@ router.post("/", (req, res) => {
   // Get data from form and add to campgrounds array
   // Also redirects to the campgrounds page after the campground is created
   let name = req.body.name,
+    price = req.body.price,
     image = req.body.image,
     description = req.body.description,
     author = {
@@ -44,6 +45,7 @@ router.post("/", (req, res) => {
     // What to pass to the create function
     newcampground = {
       name: name,
+      price: price,
       image: image,
       author: author,
       description: description,

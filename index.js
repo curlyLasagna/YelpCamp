@@ -15,8 +15,7 @@ const // Dependencies
   campgroundRoutes = require("./routes/campgrounds"),
   commentRoutes = require("./routes/comments"),
   indexRoutes = require("./routes/index"),
-  app = express(),
-  port = 9000;
+  app = express();
 
 // Connect to yelpCamp database
 mongoose.connect("mongodb://localhost/yelpCamp", {
@@ -87,6 +86,7 @@ app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
 app.use(indexRoutes);
 
-app.listen(port, () => {
-  console.log(`YelpCamp server started on port ${port}`);
+const PORT = process.env.PORT || 9000;
+app.listen(PORT, () => {
+  console.log(`YelpCamp server started on port ${PORT}`);
 });
